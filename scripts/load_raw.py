@@ -1,5 +1,5 @@
 """
-E + L ของ ELT: อ่านไฟล์ CSV ของ Northwind จาก 2 ระบบ แล้วโหลดเข้า DuckDB 
+E + L ของ ELT: อ่านไฟล์ CSV ของ Northwind จาก 2 ระบบ แล้วโหลดเข้า DuckDB
 
 ผลลัพธ์: ไฟล์ northwind.duckdb ที่มี schema ชื่อ raw และตาราง 9 ตาราง (จากระบบขายปัจจุบัน 7 และระบบขายเดิม 2)
 รันซ้ำได้กี่ครั้งก็ได้ (CREATE OR REPLACE) ผลลัพธ์เหมือนเดิมทุกครั้ง
@@ -12,19 +12,20 @@ import duckdb
 # # ให้พิมพ์ภาษาไทยได้บน Windows ทุกรุ่น
 # sys.stdout.reconfigure(encoding="utf-8")
 
-# ROOT บอกตำแหน่งว่าคำสั่งนี้อยู่ในไฟล์ไหน 
-# .parent ไปไฟล์ที่ใหญ่กว่า
 ROOT = Path(__file__).resolve().parent.parent
+# print(ROOT)
 DATA_DIR = ROOT / "raw_data"
-DB_PATH = ROOT / "northwind.duckdb"
+print(DATA_DIR)
+
+DB_PATH = ROOT / "northwind_dw.duckdb"
 my_dict = {'name': 'film',
 'secondname': 'P.'
 }
 print(f"My name is {my_dict['name']}")
 
-# ตารางใน schema raw → ไฟล์ต้นทาง (มาจาก 2 ระบบ)
+# # ตารางใน schema raw → ไฟล์ต้นทาง (มาจาก 2 ระบบ)
 SOURCES = {
-# แหล่ง A: ระบบขายปัจจุบัน
+# # แหล่ง A: ระบบขายปัจจุบัน
 "customer": "raw/customer.csv",
 "employees": "raw/employees.csv",
 "order_details": "raw/order_details.csv",
@@ -32,7 +33,9 @@ SOURCES = {
 "products": "raw/products.csv",
 "shippers": "raw/shippers.csv",
 "suppliers": "raw/suppliers.csv",
-# แหล่ง B: ระบบขายเดิม (มีเฉพาะใบสั่งซื้อและรายการสินค้า)
+
+
+# # แหล่ง B: ระบบขายเดิม (มีเฉพาะใบสั่งซื้อและรายการสินค้า)
 "legacy_orders": "legacy/orders.csv",
 "legacy_order_details": "legacy/order_details.csv",
 }
@@ -41,6 +44,7 @@ SOURCES = {
 def main() -> None:
     con = duckdb.connect(str(DB_PATH))
     con.execute("CREATE SCHEMA IF NOT EXISTS raw")
+
 
     print(f"โหลดข้อมูลเข้า {DB_PATH.name}")
     for table, relative_path in SOURCES.items():
@@ -52,7 +56,7 @@ def main() -> None:
         # Load: CREATE OR REPLACE TABLE เขียนทับตารางเดิมทั้งตาราง (full refresh)
         con.execute(
             f"""
-                CREATE OR REPLACE TABLE raw.{table} AS
+                CREATE  OR REPLACE TABLE raw.{table} AS
                 SELECT *
                 FROM read_csv('{csv_path.as_posix()}', header = true)
                 """

@@ -9,3 +9,4 @@ python install -r requirements.txt
 
 print('Hello World')
 ```
+# **การดึงข้อมูล**
